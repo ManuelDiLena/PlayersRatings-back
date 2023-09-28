@@ -24,8 +24,21 @@ app.get('/', (req, res) => {
     res.send('<h1>Players Ratings</h1>')
 })
 
+// Function to get all resources
 app.get('/api/players', (req, res) => {
     res.json(players)
+})
+
+// Function to get a specific resource
+app.get('/api/players/:id', (req, res) => {
+    const id = Number(req.params.id)
+    const player = players.find(p => p.id === id)
+    
+    if (player) {
+        res.json(player)
+    } else {
+        res.status(404).end()
+    }
 })
 
 const PORT = 3001
