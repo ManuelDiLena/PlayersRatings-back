@@ -1,7 +1,22 @@
 const express = require('express')
 const app = express()
 
+// Middleware that prints on each request made
+const requestLogger = (req, res, next) => {
+    console.log('Method: ', req.method)
+    console.log('Path: ', req.path)
+    console.log('Body: ', req.body)
+    console.log('---')
+    next()
+}
+
+// Middleware used to capture requests to non-existent routes
+const unknownEndpoint = (req, res) => {
+    res.status(404).send({ error: 'unknown endpoint' })
+}
+
 app.use(express.json())
+app.use(requestLogger)
 
 let players = [
     {
@@ -82,6 +97,8 @@ app.delete('/api/players/:id', (req, res) => {
 
     res.status(204).end()
 })
+
+app.use(unknownEndpoint)
 
 const PORT = 3001
 app.listen(PORT, () => {
