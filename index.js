@@ -1,6 +1,8 @@
 const express = require('express')
 const app = express()
 
+app.use(express.json())
+
 let players = [
     {
         id: 1,
@@ -19,6 +21,14 @@ let players = [
         rating: 95
     }
 ]
+
+// Function to generate id
+const generateId = () => {
+    const maxId = players.length > 0
+        ? Math.max(...players.map(p => p.id))
+        : 0
+    return maxId + 1
+}
 
 app.get('/', (req, res) => {
     res.send('<h1>Players Ratings</h1>')
@@ -39,6 +49,30 @@ app.get('/api/players/:id', (req, res) => {
     } else {
         res.status(404).end()
     }
+})
+
+// Function to add resources
+app.post('/api/players', (req, res) => {
+    const body = req.body
+
+    if (!body.playerName) {
+        return res.status(400).json({
+            error: 'Content missing'
+        })
+    }
+
+    const player = {
+        id: generateId(),
+        playerName: body.playerName,
+        nation: body.nation,
+        position: body.position,
+        team: body.team,
+        rating: body.rating,
+    }
+
+    players = players.concat(player)
+
+    res.json(player)
 })
 
 // Function to delete a specific resource

@@ -1,1 +1,14 @@
 GET http://localhost:3001/api/players
+
+###
+
+POST http://localhost:3001/api/players
+Content-Type: application/json
+
+{
+    "playerName": "Manuel Di Lena",
+    "nation": "Argentina",
+    "position": "CF",
+    "team": "Boca Juniors (ARG)",
+    "rating": 100
+}
