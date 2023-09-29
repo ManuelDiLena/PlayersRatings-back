@@ -1,5 +1,6 @@
 const express = require('express')
 const app = express()
+const cors = require('cors')
 
 // Middleware that prints on each request made
 const requestLogger = (req, res, next) => {
@@ -15,6 +16,7 @@ const unknownEndpoint = (req, res) => {
     res.status(404).send({ error: 'unknown endpoint' })
 }
 
+app.use(cors())
 app.use(express.json())
 app.use(requestLogger)
 
