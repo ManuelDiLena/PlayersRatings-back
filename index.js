@@ -24,22 +24,22 @@ app.use(express.json())
 app.use(requestLogger)
 
 let players = [
-    {
-        id: 1,
-        playerName: 'Lionel Messi',
-        nation: 'Argentina',
-        position: 'RW',
-        team: 'Inter Miami (CAL)',
-        rating: 99
-    },
-    {
-        id: 2,
-        playerName: 'Cristiano Ronaldo',
-        nation: 'Portugal',
-        position: 'ST',
-        team: 'Al Nassr (ARA)',
-        rating: 95
-    }
+    // {
+    //     id: 1,
+    //     playerName: 'Lionel Messi',
+    //     nation: 'Argentina',
+    //     position: 'RW',
+    //     team: 'Inter Miami (CAL)',
+    //     rating: 99
+    // },
+    // {
+    //     id: 2,
+    //     playerName: 'Cristiano Ronaldo',
+    //     nation: 'Portugal',
+    //     position: 'ST',
+    //     team: 'Al Nassr (ARA)',
+    //     rating: 95
+    // }
 ]
 
 // Function to generate id
@@ -56,19 +56,16 @@ app.get('/', (req, res) => {
 
 // Function to get all resources
 app.get('/api/players', (req, res) => {
-    res.json(players)
+    Player.find({}).then(players => {
+        res.json(players)
+    })
 })
 
 // Function to get a specific resource
 app.get('/api/players/:id', (req, res) => {
-    const id = Number(req.params.id)
-    const player = players.find(p => p.id === id)
-    
-    if (player) {
+    Player.findById(req.params.id).then(player => {
         res.json(player)
-    } else {
-        res.status(404).end()
-    }
+    })
 })
 
 // Function to add resources
@@ -81,18 +78,17 @@ app.post('/api/players', (req, res) => {
         })
     }
 
-    const player = {
-        id: generateId(),
+    const player = new Player({
         playerName: body.playerName,
         nation: body.nation,
         position: body.position,
         team: body.team,
         rating: body.rating,
-    }
+    })
 
-    players = players.concat(player)
-
-    res.json(player)
+    player.save().then(savedPlayer => {
+        res.json(savedPlayer)
+    })
 })
 
 // Function to delete a specific resource
