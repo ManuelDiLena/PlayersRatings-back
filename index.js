@@ -1,6 +1,9 @@
+require('dotenv').config()
 const express = require('express')
 const app = express()
 const cors = require('cors')
+
+const Player = require('./models/player')
 
 // Middleware that prints on each request made
 const requestLogger = (req, res, next) => {
@@ -102,7 +105,7 @@ app.delete('/api/players/:id', (req, res) => {
 
 app.use(unknownEndpoint)
 
-const PORT = 3001
+const PORT = process.env.PORT
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`)
 })
