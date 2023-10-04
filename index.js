@@ -70,7 +70,7 @@ app.get('/api/players/:id', (req, res, next) => {
 })
 
 // Function to add resources
-app.post('/api/players', (req, res) => {
+app.post('/api/players', (req, res, next) => {
     const body = req.body
 
     if (!body.playerName) {
@@ -87,17 +87,22 @@ app.post('/api/players', (req, res) => {
         rating: body.rating,
     })
 
-    player.save().then(savedPlayer => {
-        res.json(savedPlayer)
-    })
+    player
+        .save()
+        .then(savedPlayer => savedPlayer.toJSON())
+        .then(savedAndFormattedPlayer => {
+            res.json(savedAndFormattedPlayer)
+        })
+        .catch(error => next(error))
 })
 
 // Function to delete a specific resource
-app.delete('/api/players/:id', (req, res) => {
-    const id = Number(req.params.id)
-    players = players.filter(p => p.id !== id)
-
-    res.status(204).end()
+app.delete('/api/players/:id', (req, res, next) => {
+    Player.findByIdAndRemove(req.params.id)
+        .then(result => {
+            res.status(204).end()
+        })
+        .catch(error => next(error))
 })
 
 // Middleware used to capture requests to non-existent routes
@@ -113,6 +118,8 @@ const errorHandler = (error, req, res, next) => {
 
     if (error.name === 'CastError') {
         return res.status(400).send({ error: 'malformatted id' })
+    } else if (error.name === 'ValidationError') {
+        return res.status(400).json({ error: error.message })
     }
 
     next(error)
