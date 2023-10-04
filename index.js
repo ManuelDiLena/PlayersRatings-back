@@ -14,11 +14,6 @@ const requestLogger = (req, res, next) => {
     next()
 }
 
-// Middleware used to capture requests to non-existent routes
-const unknownEndpoint = (req, res) => {
-    res.status(404).send({ error: 'unknown endpoint' })
-}
-
 app.use(cors())
 app.use(express.json())
 app.use(requestLogger)
@@ -62,7 +57,7 @@ app.get('/api/players', (req, res) => {
 })
 
 // Function to get a specific resource
-app.get('/api/players/:id', (req, res) => {
+app.get('/api/players/:id', (req, res, next) => {
     Player.findById(req.params.id)
         .then(player => {
             if (player) {
@@ -71,10 +66,7 @@ app.get('/api/players/:id', (req, res) => {
                 res.status(404).end()
             }
         })
-        .catch(error => {
-            console.log(error)
-            res.status(400).send({ error: 'malformatted id' })
-        })
+        .catch(error => next(error))
 })
 
 // Function to add resources
@@ -108,7 +100,25 @@ app.delete('/api/players/:id', (req, res) => {
     res.status(204).end()
 })
 
+// Middleware used to capture requests to non-existent routes
+const unknownEndpoint = (req, res) => {
+    res.status(404).send({ error: 'unknown endpoint' })
+}
+
 app.use(unknownEndpoint)
+
+// Function that handles all back errors
+const errorHandler = (error, req, res, next) => {
+    console.log(error.message)
+
+    if (error.name === 'CastError') {
+        return res.status(400).send({ error: 'malformatted id' })
+    }
+
+    next(error)
+}
+
+app.use(errorHandler)
 
 const PORT = process.env.PORT
 app.listen(PORT, () => {
