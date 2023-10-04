@@ -63,9 +63,18 @@ app.get('/api/players', (req, res) => {
 
 // Function to get a specific resource
 app.get('/api/players/:id', (req, res) => {
-    Player.findById(req.params.id).then(player => {
-        res.json(player)
-    })
+    Player.findById(req.params.id)
+        .then(player => {
+            if (player) {
+                res.json(player)
+            } else {
+                res.status(404).end()
+            }
+        })
+        .catch(error => {
+            console.log(error)
+            res.status(400).send({ error: 'malformatted id' })
+        })
 })
 
 // Function to add resources
