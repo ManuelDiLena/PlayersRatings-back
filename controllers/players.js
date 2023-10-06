@@ -8,20 +8,17 @@ playersRouter.get('/', async (req, res) => {
 })
 
 // Controller to get a specific player
-playersRouter.get('/:id', (req, res, next) => {
-    Player.findById(req.params.id)
-        .then(player => {
-            if (player) {
-                res.json(player)
-            } else {
-                res.status(404).end()
-            }
-        })
-        .catch(error => next(error))
+playersRouter.get('/:id', async (req, res) => {
+    const player = await Player.findById(req.params.id)
+    if (player) {
+        res.json(player)
+    } else {
+        res.status(404).end()
+    }
 })
 
 // Controller to create a new player
-playersRouter.post('/', async (req, res, next) => {
+playersRouter.post('/', async (req, res) => {
     const body = req.body
 
     const player = new Player({
@@ -37,12 +34,9 @@ playersRouter.post('/', async (req, res, next) => {
 })
 
 // Controller to delete a specific player
-playersRouter.delete('/:id', (req, res, next) => {
-    Player.findByIdAndRemove(req.params.id)
-        .then(() => {
-            res.status(204).end()
-        })
-        .catch(error => next(error))
+playersRouter.delete('/:id', async (req, res) => {
+    await Player.findByIdAndRemove(req.params.id)
+    res.status(204).end()
 })
 
 module.exports = playersRouter

@@ -74,6 +74,26 @@ test('Player without name is not added', async () => {
     expect(playersAtEnd).toHaveLength(helper.initialPlayers.length)
 })
 
+// Test to verify that a player is deleted
+test('A player can be deleted', async () => {
+    const playersAtStart = await helper.playersInDb()
+    const playerToDelete = playersAtStart[0]
+
+    await api
+        .delete(`/api/players/${playerToDelete.id}`)
+        .expect(204)
+
+    const playersAtEnd = await helper.playersInDb()
+
+    expect(playersAtEnd).toHaveLength(
+        helper.initialPlayers.length - 1
+    )
+
+    const names = playersAtEnd.map(r => r.playerName)
+
+    expect(names).not.toContain(playerToDelete.playerName)
+})
+
 // Function to terminate the connection with the test DB
 afterAll(() => {
     mongoose.connection.close()
