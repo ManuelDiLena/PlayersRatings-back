@@ -2,10 +2,9 @@ const playersRouter = require('express').Router()
 const Player = require('../models/player')
 
 // Controller to get all players on the server
-playersRouter.get('/', (req, res) => {
-    Player.find({}).then(players => {
-        res.json(players)
-    })
+playersRouter.get('/', async (req, res) => {
+    const players = await Player.find({})
+    res.json(players)
 })
 
 // Controller to get a specific player
@@ -22,7 +21,7 @@ playersRouter.get('/:id', (req, res, next) => {
 })
 
 // Controller to create a new player
-playersRouter.post('/', (req, res, next) => {
+playersRouter.post('/', async (req, res, next) => {
     const body = req.body
 
     const player = new Player({
@@ -33,11 +32,8 @@ playersRouter.post('/', (req, res, next) => {
         rating: body.rating
     })
 
-    player.save()
-        .then(savedPlayer => {
-            res.json(savedPlayer)
-        })
-        .catch(error => next(error))
+    const savedPlayer = await player.save()
+    res.json(savedPlayer)
 })
 
 // Controller to delete a specific player

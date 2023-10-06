@@ -1,7 +1,11 @@
 const mongoose = require('mongoose')
 
 const playerSchema = new mongoose.Schema({
-    playerName: String,
+    playerName: {
+        type: String,
+        minlength: 5,
+        required: true
+    },
     nation: String,
     position: String,
     team: String,
