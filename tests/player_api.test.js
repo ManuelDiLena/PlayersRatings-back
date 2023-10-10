@@ -10,11 +10,10 @@ const Player = require('../models/player')
 beforeEach(async () => {
     await Player.deleteMany({})
     
-    let playerObject = new Player(helper.initialPlayers[0])
-    await playerObject.save()
-
-    playerObject = new Player(helper.initialPlayers[1])
-    await playerObject.save()
+    const playerObjects = helper.initialPlayers
+        .map(player => new Player(player))
+    const promiseArray = playerObjects.map(player => player.save())
+    await Promise.all(promiseArray)
 })
 
 // Test to see if we got all the players
