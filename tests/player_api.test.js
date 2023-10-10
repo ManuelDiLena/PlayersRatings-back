@@ -1,5 +1,5 @@
-const mongoose = require('mongoose')
 const supertest = require('supertest')
+const mongoose = require('mongoose')
 const helper = require('./test_helper')
 const app = require('../app')
 const api = supertest(app)
@@ -16,82 +16,116 @@ beforeEach(async () => {
     await Promise.all(promiseArray)
 })
 
-// Test to see if we got all the players
-test('All players are returned', async () => {
-    const response = await api.get('/api/players')
+describe('When there is initially some players saved', () => {
+    // Test to see if we got all the players
+    test('All players are returned', async () => {
+        const response = await api.get('/api/players')
+    
+        expect(response.body).toHaveLength(helper.initialPlayers.length)
+    })
 
-    expect(response.body).toHaveLength(helper.initialPlayers.length)
+    // Test to see if we got an Argentine player
+    test('The first player is from Argentina', async () => {
+        const response = await api.get('/api/players')
+
+        const contents = response.body.map(r => r.nation)
+        expect(contents).toContain('Argentina')
+    })
 })
 
-// Test to see if we got an Argentine player
-test('The first player is from Argentina', async () => {
-    const response = await api.get('/api/players')
+describe('Viewing a specific player', () => {
+    // Test to get a specific player
+    test('Succeeds with a valid id', async () => {
+        const playersAtStart = await helper.playersInDb()
 
-    const contents = response.body.map(r => r.nation)
-    expect(contents).toContain('Argentina')
+        const playerToView = playersAtStart[0]
+
+        const resultPlayer = await api
+            .get(`/api/players/${playerToView.id}`)
+            .expect(200)
+            .expect('Content-Type', /application\/json/)
+
+        const processedPlayerToView = JSON.parse(JSON.stringify(playerToView))
+
+        expect(resultPlayer.body).toEqual(processedPlayerToView)
+    })
+
+    // Test to check the response when a wrong ID is entered
+    test('Fails with statuscode 400 id is invalid', async () => {
+        const invalidId = '5a3d5da59070081a82a3445'
+
+        await api
+            .get(`/api/players/${invalidId}`)
+            .expect(400)
+    })
 })
 
-// Test adding a new player and verifying that the number of returned players increases
-test('A valid player can be added', async () => {
-    const newPlayer = {
-        playerName: 'Test Player',
-        nation: 'International',
-        position: 'XX',
-        team: 'Test Team',
-        rating: 99,
-    }
+describe('Addition of a new player', () => {
+    // Test adding a new player and verifying that the number of returned players increases
+    test('A valid player can be added', async () => {
+        const newPlayer = {
+            playerName: 'Test Player',
+            nation: 'International',
+            position: 'XX',
+            team: 'Test Team',
+            rating: 99,
+        }
 
-    await api
-        .post('/api/players')
-        .send(newPlayer)
-        .expect(200)
-        .expect('Content-Type', /application\/json/)
+        await api
+            .post('/api/players')
+            .send(newPlayer)
+            .expect(200)
+            .expect('Content-Type', /application\/json/)
 
-    const playersAtEnd = await helper.playersInDb()
-    expect(playersAtEnd).toHaveLength(helper.initialPlayers.length + 1)
+        const playersAtEnd = await helper.playersInDb()
+        expect(playersAtEnd).toHaveLength(helper.initialPlayers.length + 1)
 
-    const nations = playersAtEnd.map(p => p.nation)
-    expect(nations).toContain('International')
+        const nations = playersAtEnd.map(p => p.nation)
+        expect(nations).toContain('International')
+    })
+
+    // Test that verifies that an unnamed player will not be saved in the database
+    test('Player without name is not added', async () => {
+        const newPlayer = {
+            nation: 'International',
+            position: 'XX',
+            team: 'Test Team',
+            rating: 99,
+        }
+
+        await api 
+            .post('/api/players')
+            .send(newPlayer)
+            .expect(400)
+
+        const playersAtEnd = await helper.playersInDb()
+
+        expect(playersAtEnd).toHaveLength(helper.initialPlayers.length)
+    })
 })
 
-// Test that verifies that an unnamed player will not be saved in the database
-test('Player without name is not added', async () => {
-    const newPlayer = {
-        nation: 'International',
-        position: 'XX',
-        team: 'Test Team',
-        rating: 99,
-    }
+describe('Deletion of a player', () => {
+    // Test to verify that a player is deleted
+    test('A player can be deleted', async () => {
+        const playersAtStart = await helper.playersInDb()
+        const playerToDelete = playersAtStart[0]
 
-    await api 
-        .post('/api/players')
-        .send(newPlayer)
-        .expect(400)
+        await api
+            .delete(`/api/players/${playerToDelete.id}`)
+            .expect(204)
 
-    const playersAtEnd = await helper.playersInDb()
+        const playersAtEnd = await helper.playersInDb()
 
-    expect(playersAtEnd).toHaveLength(helper.initialPlayers.length)
+        expect(playersAtEnd).toHaveLength(
+            helper.initialPlayers.length - 1
+        )
+
+        const names = playersAtEnd.map(r => r.playerName)
+
+        expect(names).not.toContain(playerToDelete.playerName)
+    })
 })
 
-// Test to verify that a player is deleted
-test('A player can be deleted', async () => {
-    const playersAtStart = await helper.playersInDb()
-    const playerToDelete = playersAtStart[0]
-
-    await api
-        .delete(`/api/players/${playerToDelete.id}`)
-        .expect(204)
-
-    const playersAtEnd = await helper.playersInDb()
-
-    expect(playersAtEnd).toHaveLength(
-        helper.initialPlayers.length - 1
-    )
-
-    const names = playersAtEnd.map(r => r.playerName)
-
-    expect(names).not.toContain(playerToDelete.playerName)
-})
 
 // Function to terminate the connection with the test DB
 afterAll(() => {
