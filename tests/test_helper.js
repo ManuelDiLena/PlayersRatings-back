@@ -1,4 +1,5 @@
 const Player = require('../models/player')
+const User = require('../models/user')
 
 const initialPlayers = [
     {
@@ -20,9 +21,15 @@ const initialPlayers = [
 // Function to check players stored in DB
 const playersInDb = async () => {
     const players = await Player.find({})
-    return players.map(player => player.toJSON())
+    return players.map(p => p.toJSON())
+}
+
+// Function to check users stored in DB
+const usersInDb = async () => {
+    const users = await User.find({})
+    return users.map(u => u.toJSON())
 }
 
 module.exports = {
-    initialPlayers, playersInDb
+    initialPlayers, playersInDb, usersInDb,
 }
