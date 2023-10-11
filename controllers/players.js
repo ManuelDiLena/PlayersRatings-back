@@ -4,7 +4,8 @@ const User = require('../models/user')
 
 // Controller to get all players on the server
 playersRouter.get('/', async (req, res) => {
-    const players = await Player.find({})
+    const players = await Player
+        .find({}).populate('user', { username: 1, name: 1 })
     res.json(players)
 })
 
