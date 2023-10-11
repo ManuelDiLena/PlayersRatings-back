@@ -1,5 +1,6 @@
 const playersRouter = require('express').Router()
 const Player = require('../models/player')
+const User = require('../models/user')
 
 // Controller to get all players on the server
 playersRouter.get('/', async (req, res) => {
@@ -21,15 +22,21 @@ playersRouter.get('/:id', async (req, res) => {
 playersRouter.post('/', async (req, res) => {
     const body = req.body
 
+    const user = await User.findById(body.userId)
+
     const player = new Player({
         playerName: body.playerName,
         nation: body.nation,
         position: body.position,
         team: body.team,
-        rating: body.rating
+        rating: body.rating,
+        user: user._id
     })
 
     const savedPlayer = await player.save()
+    user.players = user.players.concat(savedPlayer._id)
+    await user.save()
+
     res.json(savedPlayer)
 })
 
