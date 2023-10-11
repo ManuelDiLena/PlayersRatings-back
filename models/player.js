@@ -10,6 +10,10 @@ const playerSchema = new mongoose.Schema({
     position: String,
     team: String,
     rating: Number,
+    user: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User'
+    }
 })
 
 playerSchema.set('toJSON', {
