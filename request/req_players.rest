@@ -12,3 +12,13 @@ Content-Type: application/json
     "team": "Boca Juniors (ARG)",
     "rating": 100
 }
+
+###
+
+POST http://localhost:3001/api/login
+Content-Type: application/json
+
+{
+    "username": "dilenman",
+    "password": "dilenman"
+}
