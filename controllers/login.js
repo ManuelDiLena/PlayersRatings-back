@@ -4,6 +4,8 @@ const loginRouter = require('express').Router()
 
 const User = require('../models/user')
 
+// Function that checks if a user is already registered
+// If so it lets them login and provides them with a token
 loginRouter.post('/', async (req, res) => {
     const body = req.body
 

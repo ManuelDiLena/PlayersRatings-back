@@ -1,6 +1,18 @@
 const playersRouter = require('express').Router()
+
 const Player = require('../models/player')
 const User = require('../models/user')
+
+const jwt = require('jsonwebtoken')
+
+// Function to separate the token from the authorization header
+const getTokenFrom = req => {
+    const authorization = req.get('authorization')
+    if (authorization && authorization.toLowerCase().startsWith('bearer ')) {
+        return authorization.substring(7)
+    }
+    return null
+}
 
 // Controller to get all players on the server
 playersRouter.get('/', async (req, res) => {
@@ -22,8 +34,15 @@ playersRouter.get('/:id', async (req, res) => {
 // Controller to create a new player
 playersRouter.post('/', async (req, res) => {
     const body = req.body
+    const token = getTokenFrom(req)
+    console.log(token)
 
-    const user = await User.findById(body.userId)
+    const decodedToken = jwt.verify(token, process.env.SECRET)
+    if (!token || !decodedToken.id) {
+        return res.status(401).json({ error: 'token missing or invalid' })
+    }
+
+    const user = await User.findById(decodedToken.id)
 
     const player = new Player({
         playerName: body.playerName,

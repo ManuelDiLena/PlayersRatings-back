@@ -4,6 +4,7 @@ GET http://localhost:3001/api/players
 
 POST http://localhost:3001/api/players
 Content-Type: application/json
+Authorization: bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImRpbGVubWFuIiwiaWQiOiI2NTI2YmY2YTY4MTZiNTBmZTIzYTNmMGMiLCJpYXQiOjE2OTcxMzIzMjh9.l-MlCh5h3ZkG0g8DsBoL9V5462KXYPpNpDLWSQJTR0Y
 
 {
     "playerName": "Manuel Di Lena",
